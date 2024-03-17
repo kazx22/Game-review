@@ -4,6 +4,7 @@ import {
   Text,
   Image,
   TouchableOpacity,
+  ScrollView,
   StyleSheet,
   Animated,
 } from "react-native";
@@ -12,6 +13,7 @@ import { FontAwesome } from "@expo/vector-icons";
 
 const Game = () => {
   const [currCardInd, setCurrCardInd] = useState(0);
+  const [selectedTab, setSelectedTab] = useState("description");
   const fadeAnimation = useRef(new Animated.Value(1)).current;
 
   const handleMoveLeft = () => {
@@ -26,12 +28,50 @@ const Game = () => {
     }
   };
 
+  const handleTabPress = (tab) => {
+    setSelectedTab(tab);
+  };
+
+  const handleReviewPress = (review) => {
+    console.log("Full review:");
+  };
+
+  const handleAddReview = (review) => {
+    console.log("Add review:");
+  };
+  const renderReviews = (reviews) => {
+    return reviews.map((review, index) => (
+      <TouchableOpacity
+        key={index}
+        style={styles.reviewContainer}
+        onPress={() => handleReviewPress(review)}
+      >
+        <Text style={styles.reviewInitials}>{review.user}</Text>
+        <View style={styles.reviewContent}>
+          <Text style={styles.reviewText}>{review.snippet}</Text>
+          <View style={styles.ratingContainer}>
+            {Array.from({ length: review.rating }).map((_, i) => (
+              <FontAwesome key={i} name="star" size={20} color="#ffc107" />
+            ))}
+          </View>
+        </View>
+      </TouchableOpacity>
+    ));
+  };
+
   const cards = [
     {
       title: "Game Title 1",
       moderator: "Moderator: John Doe",
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et ullamcorper nisi.",
+      reviews: [
+        { user: "User1", snippet: "Great game!", rating: 5 },
+        { user: "User2", snippet: "Enjoyed playing it.", rating: 4 },
+        { user: "User3", snippet: "Could be better.", rating: 3 },
+        { user: "User3", snippet: "Could be better.", rating: 3 },
+        { user: "User3", snippet: "Could be better.", rating: 3 },
+      ],
       imageUri:
         "https://upload.wikimedia.org/wikipedia/en/8/8d/Dark_Souls_Cover_Art.jpg",
     },
@@ -40,6 +80,11 @@ const Game = () => {
       moderator: "Moderator: John Doe",
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et ullamcorper nisi.",
+      reviews: [
+        { user: "User4", snippet: "Amazing experience!", rating: 5 },
+        { user: "User5", snippet: "Highly recommended.", rating: 5 },
+        { user: "User6", snippet: "Addictive gameplay.", rating: 4 },
+      ],
       imageUri:
         "https://upload.wikimedia.org/wikipedia/en/8/8d/Dark_Souls_Cover_Art.jpg",
     },
@@ -71,11 +116,72 @@ const Game = () => {
           style={styles.coverPhoto}
         />
         <View style={styles.content}>
-          <Text style={styles.title}>{cards[currCardInd].title}</Text>
-          <Text style={styles.moderator}>{cards[currCardInd].moderator}</Text>
-          <Text style={styles.description}>
-            {cards[currCardInd].description}
-          </Text>
+          <View style={styles.tabContainer}>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                selectedTab === "description" && styles.activeTabButton,
+              ]}
+              onPress={() => handleTabPress("description")}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  selectedTab === "description" && styles.activeTabText,
+                ]}
+              >
+                Description
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                selectedTab === "reviews" && styles.activeTabButton,
+              ]}
+              onPress={() => handleTabPress("reviews")}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  selectedTab === "reviews" && styles.activeTabText,
+                ]}
+              >
+                Reviews
+              </Text>
+            </TouchableOpacity>
+          </View>
+          {selectedTab === "description" ? (
+            <>
+              <Text style={styles.title}>{cards[currCardInd].title}</Text>
+              <Text style={styles.moderator}>
+                {cards[currCardInd].moderator}
+              </Text>
+              <Text style={styles.description}>
+                {cards[currCardInd].description}
+              </Text>
+            </>
+          ) : (
+            <>
+              <ScrollView style={styles.reviewScroll}>
+                {renderReviews(cards[currCardInd].reviews)}
+              </ScrollView>
+              <View style={{ marginTop: 20, alignItems: "center" }}>
+                <LinearGradient
+                  colors={["#d11515", "#fa1919"]}
+                  style={[styles.gradient, { width: 200, height: 50 }]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                >
+                  <TouchableOpacity
+                    onPress={handleAddReview}
+                    style={[styles.button, { width: 200, height: 50 }]}
+                  >
+                    <Text style={styles.text}>Add Review</Text>
+                  </TouchableOpacity>
+                </LinearGradient>
+              </View>
+            </>
+          )}
         </View>
       </Animated.View>
 
@@ -153,6 +259,54 @@ const styles = StyleSheet.create({
     textAlign: "left",
     marginBottom: 10,
   },
+  tabContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 10,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+
+    borderColor: "#ccc",
+    alignItems: "center",
+  },
+  activeTabButton: {
+    backgroundColor: "#d11515",
+    borderColor: "#d11515",
+  },
+  tabText: {
+    color: "#000",
+  },
+  activeTabText: {
+    color: "#fff",
+  },
+  reviewScroll: {
+    maxHeight: 200,
+  },
+  reviewContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  reviewInitials: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginRight: 10,
+  },
+  reviewContent: {
+    flex: 1,
+  },
+  reviewText: {
+    fontSize: 14,
+    marginBottom: 5,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+  },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
@@ -185,6 +339,13 @@ const styles = StyleSheet.create({
     height: 60,
     justifyContent: "center",
     alignItems: "center",
+  },
+
+  text: {
+    fontSize: 16,
+    paddingHorizontal: 5,
+    textAlign: "center",
+    color: "#fff",
   },
 });
 
