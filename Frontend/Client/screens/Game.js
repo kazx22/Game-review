@@ -10,8 +10,9 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome } from "@expo/vector-icons";
-
+import { useNavigation } from "@react-navigation/native";
 const Game = () => {
+  const navigation = useNavigation();
   const [currCardInd, setCurrCardInd] = useState(0);
   const [selectedTab, setSelectedTab] = useState("description");
   const fadeAnimation = useRef(new Animated.Value(1)).current;
@@ -33,11 +34,11 @@ const Game = () => {
   };
 
   const handleReviewPress = (review) => {
-    console.log("Full review:");
+    navigation.navigate("GameReview");
   };
 
   const handleAddReview = (review) => {
-    console.log("Add review:");
+    navigation.navigate("GameDescAdd");
   };
   const renderReviews = (reviews) => {
     return reviews.map((review, index) => (
