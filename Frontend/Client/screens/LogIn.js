@@ -9,6 +9,9 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { FontAwesome } from "@expo/vector-icons";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 const LogIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -16,8 +19,24 @@ const LogIn = () => {
 
   const navigation = useNavigation();
 
-  const handleLogin = () => {
-    navigation.navigate("Tabs");
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post(
+        "https://0381-81-106-70-173.ngrok-free.app/api/user/loginUser",
+        { username, password }
+      );
+      if (!response || !response.data || !response.data.token) {
+        throw new Error("Invalid response from server");
+      }
+      const { token } = response.data;
+      console.log("Login successful. Token:", token);
+
+      await AsyncStorage.setItem("token", token);
+
+      navigation.navigate("Tabs");
+    } catch (error) {
+      console.error("Login failed:", error.message);
+    }
   };
 
   const handleSignUp = () => {

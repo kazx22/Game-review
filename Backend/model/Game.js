@@ -8,6 +8,7 @@ const gameSchema = new mongoose.Schema({
   releaseDate: { type: Date, required: true },
   genre: { type: String, required: true },
   platform: { type: String, required: true },
+  rating: { type: String, required: true, min: 0, max: 5 },
   comments: [Comment.schema],
 });
 

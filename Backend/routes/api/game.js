@@ -17,8 +17,6 @@ const { check, validationResult } = require("express-validator");
 
 router.post(
   "/",
-  auth,
-  roleCheck,
   [
     check("title", "Title is required").not().isEmpty(),
     check("description", "Description is required").not().isEmpty(),
@@ -26,6 +24,7 @@ router.post(
     check("releaseDate", "Release date is required").isISO8601(),
     check("genre", "Genre is required").not().isEmpty(),
     check("platform", "Platform is required").not().isEmpty(),
+    check("rating", "Rating is required").not().isEmpty(),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -35,8 +34,15 @@ router.post(
     }
 
     try {
-      const { title, description, imageUrl, releaseDate, genre, platform } =
-        req.body;
+      const {
+        title,
+        description,
+        imageUrl,
+        releaseDate,
+        genre,
+        platform,
+        rating,
+      } = req.body;
 
       const game = new Game({
         title,
@@ -45,6 +51,7 @@ router.post(
         releaseDate,
         genre,
         platform,
+        rating,
       });
 
       await game.save();

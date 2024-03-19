@@ -1,33 +1,65 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  Animated,
+  Easing,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 
 const GameReview = () => {
-  const [isCommentsVisible, setIsCommentsVisible] = useState(false);
+  const [commentVis, setCommentVis] = useState(false);
+  const [showReplies, setShowReplies] = useState({});
+
+  const slideAnim = useRef(new Animated.Value(0)).current;
+
+  const toggleCommentsVisibility = () => {
+    setCommentVis((prev) => !prev);
+    Animated.timing(slideAnim, {
+      toValue: commentVis ? 0 : 1,
+      duration: 300,
+      easing: Easing.ease,
+      useNativeDriver: true,
+    }).start();
+  };
 
   const handleCommentPress = () => {
-    setIsCommentsVisible((prev) => !prev);
+    toggleCommentsVisibility();
+  };
+
+  const handleReplyPress = (index) => {
+    setShowReplies((prevState) => ({
+      ...prevState,
+      [index]: !prevState[index],
+    }));
   };
 
   const renderComments = () => {
-    const dummyComments = [
+    const comments = [
       { author: "User1", text: "Great game!" },
       { author: "User2", text: "Nice graphics!" },
       { author: "User3", text: "Enjoyed playing it." },
     ];
-    return dummyComments.map((comment, index) => (
+
+    return comments.map((comment, index) => (
       <View key={index} style={styles.commentContainer}>
         <Text style={styles.commentAuthor}>{comment.author}</Text>
         <Text style={styles.commentText}>{comment.text}</Text>
-        <TouchableOpacity style={styles.replyButton}>
+        <TouchableOpacity
+          style={styles.replyButton}
+          onPress={() => handleReplyPress(index)}
+        >
           <Text style={styles.replyButtonText}>Reply</Text>
         </TouchableOpacity>
+        {showReplies[index] && (
+          <View style={styles.replyContainer}>
+            <Text>Reply 1</Text>
+            <Text>Reply 2</Text>
+          </View>
+        )}
       </View>
     ));
   };
@@ -47,20 +79,32 @@ const GameReview = () => {
           Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et
           ullamcorper nisi.
         </Text>
-
-        {isCommentsVisible && (
-          <View style={styles.commentsContainer}>
-            <Text style={styles.commentsTitle}>Comments</Text>
-            {renderComments()}
-          </View>
-        )}
       </View>
-      <TouchableOpacity
-        style={[styles.button, {}]}
-        onPress={handleCommentPress}
-      >
+      <TouchableOpacity style={styles.button} onPress={handleCommentPress}>
         <FontAwesome name="comment" size={24} color="white" />
       </TouchableOpacity>
+      {commentVis && (
+        <Animated.View
+          style={[
+            styles.commentsContainer,
+            {
+              transform: [
+                {
+                  translateY: slideAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [300, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <Text style={styles.commentsTitle}>Comments</Text>
+          <ScrollView style={styles.commentsScrollView}>
+            {renderComments()}
+          </ScrollView>
+        </Animated.View>
+      )}
     </ScrollView>
   );
 };
@@ -69,6 +113,7 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
+    marginTop: 30,
   },
   cardContainer: {
     backgroundColor: "#ffffff",
@@ -113,6 +158,9 @@ const styles = StyleSheet.create({
   commentsContainer: {
     marginTop: 20,
   },
+  commentsScrollView: {
+    maxHeight: 200,
+  },
   commentsTitle: {
     fontSize: 20,
     fontWeight: "bold",
@@ -138,6 +186,12 @@ const styles = StyleSheet.create({
   },
   replyButtonText: {
     color: "#ffffff",
+  },
+  replyContainer: {
+    backgroundColor: "#f9f9f9",
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 5,
   },
 });
 

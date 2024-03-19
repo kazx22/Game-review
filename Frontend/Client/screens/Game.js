@@ -15,7 +15,21 @@ const Game = () => {
   const navigation = useNavigation();
   const [currCardInd, setCurrCardInd] = useState(0);
   const [selectedTab, setSelectedTab] = useState("description");
-  const fadeAnimation = useRef(new Animated.Value(1)).current;
+  const [fadeAnimation] = useState(new Animated.Value(1));
+  const [cards, setCards] = useState([]);
+
+  useEffect(() => {
+    const fetchCards = async () => {
+      try {
+        const response = await axios.get("http://your-backend-api/cards");
+        setCards(response.data);
+      } catch (error) {
+        console.error("Error fetching cards:", error);
+      }
+    };
+
+    fetchCards();
+  }, []);
 
   const handleMoveLeft = () => {
     if (currCardInd > 0) {
@@ -40,6 +54,7 @@ const Game = () => {
   const handleAddReview = (review) => {
     navigation.navigate("GameDescAdd");
   };
+
   const renderReviews = (reviews) => {
     return reviews.map((review, index) => (
       <TouchableOpacity
@@ -59,37 +74,6 @@ const Game = () => {
       </TouchableOpacity>
     ));
   };
-
-  const cards = [
-    {
-      title: "Game Title 1",
-      moderator: "Moderator: John Doe",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et ullamcorper nisi.",
-      reviews: [
-        { user: "User1", snippet: "Great game!", rating: 5 },
-        { user: "User2", snippet: "Enjoyed playing it.", rating: 4 },
-        { user: "User3", snippet: "Could be better.", rating: 3 },
-        { user: "User3", snippet: "Could be better.", rating: 3 },
-        { user: "User3", snippet: "Could be better.", rating: 3 },
-      ],
-      imageUri:
-        "https://upload.wikimedia.org/wikipedia/en/8/8d/Dark_Souls_Cover_Art.jpg",
-    },
-    {
-      title: "Game Title 2",
-      moderator: "Moderator: John Doe",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et ullamcorper nisi.",
-      reviews: [
-        { user: "User4", snippet: "Amazing experience!", rating: 5 },
-        { user: "User5", snippet: "Highly recommended.", rating: 5 },
-        { user: "User6", snippet: "Addictive gameplay.", rating: 4 },
-      ],
-      imageUri:
-        "https://upload.wikimedia.org/wikipedia/en/8/8d/Dark_Souls_Cover_Art.jpg",
-    },
-  ];
 
   const fadeIn = () => {
     Animated.timing(fadeAnimation, {

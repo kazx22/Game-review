@@ -10,6 +10,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import DatePicker from "@react-native-community/datetimepicker";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
 
 const SignUp = () => {
   const navigation = useNavigation();
@@ -22,10 +23,28 @@ const SignUp = () => {
   const [dob, setDob] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (password !== confirmPassword) {
       Alert.alert("Passwords do not match");
       return;
+    }
+
+    try {
+      const response = await axios.post(
+        "https://0381-81-106-70-173.ngrok-free.app/api/user",
+        {
+          username,
+          name,
+          email,
+          password,
+          dob: dob.toISOString(),
+        }
+      );
+
+      navigation.navigate("Tabs");
+      console.log("User signed up:", response.data);
+    } catch (error) {
+      console.error(error.message);
     }
   };
 

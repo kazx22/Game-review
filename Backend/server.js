@@ -20,5 +20,5 @@ app.use("/api/auth", require("./routes/api/auth"));
 app.use("/api/game", require("./routes/api/game"));
 app.use("/api/comment", require("./routes/api/comment"));
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server is Listening to ${PORT}`));
