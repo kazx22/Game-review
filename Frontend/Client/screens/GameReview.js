@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,12 +9,16 @@ import {
   Easing,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
+import axios from "axios";
 
-const GameReview = () => {
+const GameReview = ({ route }) => {
+  const { reviewId, gameId } = route.params;
   const [commentVis, setCommentVis] = useState(false);
   const [showReplies, setShowReplies] = useState({});
-
+  const [comments, setComments] = useState([]);
+  const [review, setReview] = useState();
   const slideAnim = useRef(new Animated.Value(0)).current;
+  const [loading, setLoading] = useState(true);
 
   const toggleCommentsVisibility = () => {
     setCommentVis((prev) => !prev);
@@ -25,6 +29,24 @@ const GameReview = () => {
       useNativeDriver: true,
     }).start();
   };
+
+  useEffect(() => {
+    const fetchReview = async () => {
+      console.log(reviewId, gameId);
+      try {
+        const response = await axios.get(
+          `https://b41b-81-106-70-173.ngrok-free.app/api/game/${gameId}/reviews/${reviewId}`
+        );
+        setReview(response.data);
+        setLoading(false); // Mark loading as false after data is fetched
+        console.log(response.data);
+      } catch (error) {
+        console.error("Error fetching comments:", error);
+      }
+    };
+
+    fetchReview();
+  }, []);
 
   const handleCommentPress = () => {
     toggleCommentsVisibility();
@@ -37,49 +59,27 @@ const GameReview = () => {
     }));
   };
 
-  const renderComments = () => {
-    const comments = [
-      { author: "User1", text: "Great game!" },
-      { author: "User2", text: "Nice graphics!" },
-      { author: "User3", text: "Enjoyed playing it." },
-    ];
-
-    return comments.map((comment, index) => (
-      <View key={index} style={styles.commentContainer}>
-        <Text style={styles.commentAuthor}>{comment.author}</Text>
-        <Text style={styles.commentText}>{comment.text}</Text>
-        <TouchableOpacity
-          style={styles.replyButton}
-          onPress={() => handleReplyPress(index)}
-        >
-          <Text style={styles.replyButtonText}>Reply</Text>
-        </TouchableOpacity>
-        {showReplies[index] && (
-          <View style={styles.replyContainer}>
-            <Text>Reply 1</Text>
-            <Text>Reply 2</Text>
-          </View>
-        )}
-      </View>
-    ));
-  };
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.cardContainer}>
-        <Text style={styles.cardTitle}>Game Title</Text>
-        <Text style={styles.cardAuthor}>Author: John Doe</Text>
-        <View style={styles.ratingContainer}>
-          <Text style={styles.ratingText}>Rating:</Text>
-          {[...Array(4)].map((_, index) => (
-            <FontAwesome key={index} name="star" size={20} color="#ffc107" />
-          ))}
-        </View>
-        <Text style={styles.description}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et
-          ullamcorper nisi.
-        </Text>
-      </View>
+      {!loading &&
+        review && ( // Render only when review is loaded and not loading
+          <View style={styles.cardContainer}>
+            <Text style={styles.cardTitle}>{review.title}</Text>
+            <Text style={styles.cardAuthor}>Author: {review.username}</Text>
+            <View style={styles.ratingContainer}>
+              <Text style={styles.ratingText}>Rating:</Text>
+              {[...Array(review.rating)].map((_, index) => (
+                <FontAwesome
+                  key={index}
+                  name="star"
+                  size={20}
+                  color="#ffc107"
+                />
+              ))}
+            </View>
+            <Text style={styles.description}>{review.description}</Text>
+          </View>
+        )}
       <TouchableOpacity style={styles.button} onPress={handleCommentPress}>
         <FontAwesome name="comment" size={24} color="white" />
       </TouchableOpacity>
@@ -101,7 +101,7 @@ const GameReview = () => {
         >
           <Text style={styles.commentsTitle}>Comments</Text>
           <ScrollView style={styles.commentsScrollView}>
-            {renderComments()}
+            {/* Render comments here */}
           </ScrollView>
         </Animated.View>
       )}

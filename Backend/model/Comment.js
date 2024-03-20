@@ -1,16 +1,7 @@
 const mongoose = require("mongoose");
 
 const commentSchema = new mongoose.Schema({
-  userid: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-  gameid: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Game",
-    required: true,
-  },
+  username: { type: String, required: true },
   content: {
     type: String,
     required: true,
@@ -21,11 +12,7 @@ const commentSchema = new mongoose.Schema({
   },
   replies: [
     {
-      userid: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-      },
+      username: { type: String, required: true },
       content: {
         type: String,
         required: true,

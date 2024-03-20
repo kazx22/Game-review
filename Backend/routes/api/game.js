@@ -63,5 +63,146 @@ router.post(
     }
   }
 );
+router.post("/:gameId/reviews", async (req, res) => {
+  try {
+    const gameId = req.params.gameId;
+    const { title, rating, username, description } = req.body;
+
+    const game = await Game.findById(gameId);
+
+    if (!game) {
+      return res.status(404).json({ error: "Game not found" });
+    }
+
+    game.reviews.push({ title, rating, username, description });
+
+    await game.save();
+
+    res.status(201).json(game);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.post("/:gameId/reviews/:reviewId/comments", async (req, res) => {
+  try {
+    const gameId = req.params.gameId;
+    const reviewId = req.params.reviewId;
+    const { text } = req.body;
+
+    const game = await Game.findById(gameId);
+
+    if (!game) {
+      return res.status(404).json({ error: "Game not found" });
+    }
+
+    const review = game.reviews.id(reviewId);
+
+    if (!review) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    review.comments.push({ text });
+
+    await game.save();
+
+    res.status(201).json(game);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.get("/", async (req, res) => {
+  try {
+    const games = await Game.find();
+    res.json(games);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.get("/:gameId", async (req, res) => {
+  try {
+    const gameId = req.params.gameId;
+    const game = await Game.findById(gameId);
+
+    if (!game) {
+      return res.status(404).json({ error: "Game not found" });
+    }
+
+    res.json(game);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.get("/:gameId/reviews", async (req, res) => {
+  try {
+    const gameId = req.params.gameId;
+    const game = await Game.findById(gameId);
+
+    if (!game) {
+      return res.status(404).json({ error: "Game not found" });
+    }
+
+    res.json(game.reviews);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.get("/:gameId/reviews/:reviewId", async (req, res) => {
+  try {
+    const gameId = req.params.gameId;
+    const reviewId = req.params.reviewId;
+
+    const game = await Game.findById(gameId);
+
+    if (!game) {
+      return res.status(404).json({ error: "Game not found" });
+    }
+
+    const review = game.reviews.find(
+      (review) => review._id.toString() === reviewId
+    );
+
+    if (!review) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    res.json(review);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.get("/:gameId/reviews/:reviewId/comments", async (req, res) => {
+  try {
+    const gameId = req.params.gameId;
+    const reviewId = req.params.reviewId;
+    const game = await Game.findById(gameId);
+
+    if (!game) {
+      return res.status(404).json({ error: "Game not found" });
+    }
+
+    const review = game.reviews.id(reviewId);
+
+    if (!review) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    res.json(review.comments);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 module.exports = router;

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,25 +11,28 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
 const Game = () => {
   const navigation = useNavigation();
   const [currCardInd, setCurrCardInd] = useState(0);
   const [selectedTab, setSelectedTab] = useState("description");
   const [fadeAnimation] = useState(new Animated.Value(1));
-  const [cards, setCards] = useState([]);
+  const [games, setGames] = useState([]);
 
   useEffect(() => {
-    const fetchCards = async () => {
+    const fetchGames = async () => {
       try {
-        const response = await axios.get("http://your-backend-api/cards");
-        setCards(response.data);
+        const response = await axios.get(
+          "https://b41b-81-106-70-173.ngrok-free.app/api/game"
+        );
+        setGames(response.data);
       } catch (error) {
-        console.error("Error fetching cards:", error);
+        console.error("Error fetching games:", error);
       }
     };
 
-    fetchCards();
-  }, []);
+    fetchGames();
+  }, [games]);
 
   const handleMoveLeft = () => {
     if (currCardInd > 0) {
@@ -38,7 +41,7 @@ const Game = () => {
   };
 
   const handleMoveRight = () => {
-    if (currCardInd < cards.length - 1) {
+    if (currCardInd < games.length - 1) {
       fadeOut(() => setCurrCardInd((prevIndex) => prevIndex + 1));
     }
   };
@@ -48,11 +51,19 @@ const Game = () => {
   };
 
   const handleReviewPress = (review) => {
-    navigation.navigate("GameReview");
+    console.log(games[currCardInd]._id, review._id);
+    navigation.navigate("GameReview", {
+      reviewId: review._id,
+      gameId: games[currCardInd]._id,
+    });
   };
 
-  const handleAddReview = (review) => {
-    navigation.navigate("GameDescAdd");
+  const handleAddReview = () => {
+    if (games[currCardInd]) {
+      navigation.navigate("GameDescAdd", { gameId: games[currCardInd]._id });
+    } else {
+      console.error("No game selected");
+    }
   };
 
   const renderReviews = (reviews) => {
@@ -62,9 +73,10 @@ const Game = () => {
         style={styles.reviewContainer}
         onPress={() => handleReviewPress(review)}
       >
-        <Text style={styles.reviewInitials}>{review.user}</Text>
         <View style={styles.reviewContent}>
-          <Text style={styles.reviewText}>{review.snippet}</Text>
+          <Text style={styles.reviewInitials}>{review.username}</Text>
+
+          <Text style={styles.reviewText}>{review.title}</Text>
           <View style={styles.ratingContainer}>
             {Array.from({ length: review.rating }).map((_, i) => (
               <FontAwesome key={i} name="star" size={20} color="#ffc107" />
@@ -97,7 +109,7 @@ const Game = () => {
     <View style={styles.container}>
       <Animated.View style={[styles.card, { opacity: fadeAnimation }]}>
         <Image
-          source={{ uri: cards[currCardInd].imageUri }}
+          source={{ uri: games[currCardInd]?.imageUrl }}
           style={styles.coverPhoto}
         />
         <View style={styles.content}>
@@ -137,18 +149,21 @@ const Game = () => {
           </View>
           {selectedTab === "description" ? (
             <>
-              <Text style={styles.title}>{cards[currCardInd].title}</Text>
-              <Text style={styles.moderator}>
-                {cards[currCardInd].moderator}
-              </Text>
-              <Text style={styles.description}>
-                {cards[currCardInd].description}
-              </Text>
+              {games[currCardInd] && (
+                <View style={styles.cardContent}>
+                  <Text style={styles.title}>{games[currCardInd].title}</Text>
+                  <Text>{games[currCardInd].description}</Text>
+                  <Text>Release Date: {games[currCardInd].releaseDate}</Text>
+                  <Text>Genre: {games[currCardInd].genre}</Text>
+                  <Text>Platform: {games[currCardInd].platform}</Text>
+                  <Text>Rating: {games[currCardInd].rating}</Text>
+                </View>
+              )}
             </>
           ) : (
             <>
               <ScrollView style={styles.reviewScroll}>
-                {renderReviews(cards[currCardInd].reviews)}
+                {renderReviews(games[currCardInd].reviews)}
               </ScrollView>
               <View style={{ marginTop: 20, alignItems: "center" }}>
                 <LinearGradient

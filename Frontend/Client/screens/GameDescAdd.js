@@ -5,15 +5,48 @@ import {
   TouchableOpacity,
   Text,
   TextInput,
+  Alert,
 } from "react-native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const GameDescAdd = () => {
+const GameDescAdd = ({ route }) => {
+  const { gameId } = route.params;
   const [rating, setRating] = useState(0);
   const [reviewDescription, setReviewDescription] = useState("");
   const [reviewTitle, setReviewTitle] = useState("");
 
   const handleRatingSelect = (value) => {
     setRating(value);
+  };
+
+  const handleAddReview = async () => {
+    try {
+      const username = await AsyncStorage.getItem("username");
+      console.log(username, gameId);
+      if (!username) {
+        console.error("Username not found");
+        return;
+      }
+      const response = await axios.post(
+        `https://b41b-81-106-70-173.ngrok-free.app/api/game/${gameId}/reviews`,
+        {
+          title: reviewTitle,
+          rating,
+          description: reviewDescription,
+          username,
+        }
+      );
+
+      Alert.alert("Success", "Review added successfully!");
+
+      setReviewTitle("");
+      setRating(0);
+      setReviewDescription("");
+    } catch (error) {
+      console.error("Error adding review:", error);
+      Alert.alert("Error", "Failed to add review. Please try again later.");
+    }
   };
 
   return (
@@ -50,6 +83,10 @@ const GameDescAdd = () => {
         onChangeText={(text) => setReviewDescription(text)}
         multiline={true}
       />
+
+      <TouchableOpacity onPress={handleAddReview} style={styles.addButton}>
+        <Text style={styles.addButtonText}>Add Review</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -94,6 +131,16 @@ const styles = StyleSheet.create({
   },
   selectedRatingButton: {
     backgroundColor: "yellow",
+  },
+  addButton: {
+    backgroundColor: "#d11515",
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  addButtonText: {
+    color: "white",
+    fontSize: 16,
   },
 });
 

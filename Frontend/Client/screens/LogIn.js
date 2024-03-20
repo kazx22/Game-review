@@ -22,7 +22,7 @@ const LogIn = () => {
   const handleLogin = async () => {
     try {
       const response = await axios.post(
-        "https://0381-81-106-70-173.ngrok-free.app/api/user/loginUser",
+        "https://b41b-81-106-70-173.ngrok-free.app/api/user/loginUser",
         { username, password }
       );
       if (!response || !response.data || !response.data.token) {
@@ -31,8 +31,8 @@ const LogIn = () => {
       const { token } = response.data;
       console.log("Login successful. Token:", token);
 
+      await AsyncStorage.setItem("username", username);
       await AsyncStorage.setItem("token", token);
-
       navigation.navigate("Tabs");
     } catch (error) {
       console.error("Login failed:", error.message);
