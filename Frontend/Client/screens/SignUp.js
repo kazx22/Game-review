@@ -11,6 +11,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import DatePicker from "@react-native-community/datetimepicker";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
+import { BASE_URL } from "../global";
 
 const SignUp = () => {
   const navigation = useNavigation();
@@ -30,16 +31,13 @@ const SignUp = () => {
     }
 
     try {
-      const response = await axios.post(
-        "https://0381-81-106-70-173.ngrok-free.app/api/user",
-        {
-          username,
-          name,
-          email,
-          password,
-          dob: dob.toISOString(),
-        }
-      );
+      const response = await axios.post(`${BASE_URL}api/user`, {
+        username,
+        name,
+        email,
+        password,
+        dob: dob.toISOString(),
+      });
 
       navigation.navigate("Tabs");
       console.log("User signed up:", response.data);

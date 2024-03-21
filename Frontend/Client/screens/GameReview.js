@@ -10,8 +10,12 @@ import {
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import axios from "axios";
+import { useNavigation } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
+import { BASE_URL } from "../global";
 
 const GameReview = ({ route }) => {
+  navigation = useNavigation();
   const { reviewId, gameId } = route.params;
   const [commentVis, setCommentVis] = useState(false);
   const [showReplies, setShowReplies] = useState({});
@@ -31,58 +35,94 @@ const GameReview = ({ route }) => {
   };
 
   useEffect(() => {
-    const fetchReview = async () => {
-      console.log(reviewId, gameId);
-      try {
-        const response = await axios.get(
-          `https://b41b-81-106-70-173.ngrok-free.app/api/game/${gameId}/reviews/${reviewId}`
-        );
-        setReview(response.data);
-        setLoading(false); // Mark loading as false after data is fetched
-        console.log(response.data);
-      } catch (error) {
-        console.error("Error fetching comments:", error);
-      }
-    };
-
     fetchReview();
+    fetchComment();
   }, []);
-
-  const handleCommentPress = () => {
-    toggleCommentsVisibility();
+  const fetchReview = async () => {
+    console.log(reviewId, gameId);
+    try {
+      const response = await axios.get(
+        `${BASE_URL}api/game/${gameId}/reviews/${reviewId}`
+      );
+      setReview(response.data);
+      setLoading(false);
+      console.log(response.data);
+    } catch (error) {
+      setLoading(false);
+      console.error("Error fetching comments:", error);
+    }
   };
 
+  const fetchComment = async () => {
+    console.log(reviewId, gameId);
+    try {
+      const response = await axios.get(
+        `${BASE_URL}api/game/${gameId}/reviews/${reviewId}/comments`
+      );
+      setComments(response.data);
+      setLoading(false);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
+  };
+  const handleCommentPress = () => {
+    setLoading(true);
+    fetchReview();
+
+    toggleCommentsVisibility();
+  };
+  const handleAddComment = (comment) => {
+    navigation.navigate("AddComment", { gameId, reviewId });
+  };
   const handleReplyPress = (index) => {
     setShowReplies((prevState) => ({
       ...prevState,
       [index]: !prevState[index],
     }));
   };
-
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {!loading &&
-        review && ( // Render only when review is loaded and not loading
-          <View style={styles.cardContainer}>
-            <Text style={styles.cardTitle}>{review.title}</Text>
-            <Text style={styles.cardAuthor}>Author: {review.username}</Text>
-            <View style={styles.ratingContainer}>
-              <Text style={styles.ratingText}>Rating:</Text>
-              {[...Array(review.rating)].map((_, index) => (
-                <FontAwesome
-                  key={index}
-                  name="star"
-                  size={20}
-                  color="#ffc107"
-                />
-              ))}
-            </View>
-            <Text style={styles.description}>{review.description}</Text>
+  const renderComments = () => {
+    return comments.map((comment, index) => (
+      <View key={index} style={styles.commentContainer}>
+        <Text style={styles.commentAuthor}>{comment.username}</Text>
+        <Text style={styles.commentText}>{comment.content}</Text>
+        <TouchableOpacity
+          style={styles.replyButton}
+          onPress={() => handleReplyPress(index)}
+        >
+          <Text style={styles.replyButtonText}>Reply</Text>
+        </TouchableOpacity>
+        {showReplies[index] && (
+          <View style={styles.replyContainer}>
+            {/* <Text>Reply 1</Text>
+            <Text>Reply 2</Text> */}
           </View>
         )}
-      <TouchableOpacity style={styles.button} onPress={handleCommentPress}>
-        <FontAwesome name="comment" size={24} color="white" />
-      </TouchableOpacity>
+      </View>
+    ));
+  };
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      {!loading && review && (
+        <View style={styles.cardContainer}>
+          <Text style={styles.cardTitle}>{review.title}</Text>
+          <Text style={styles.cardAuthor}>Author: {review.username}</Text>
+          <View style={styles.ratingContainer}>
+            <Text style={styles.ratingText}>Rating:</Text>
+            {[...Array(review.rating)].map((_, index) => (
+              <FontAwesome key={index} name="star" size={20} color="#ffc107" />
+            ))}
+          </View>
+
+          <ScrollView>
+            <Text>Description:</Text>
+            <Text style={[styles.description, { marginTop: 10 }]}>
+              {review.description}
+            </Text>
+          </ScrollView>
+        </View>
+      )}
+
       {commentVis && (
         <Animated.View
           style={[
@@ -101,10 +141,34 @@ const GameReview = ({ route }) => {
         >
           <Text style={styles.commentsTitle}>Comments</Text>
           <ScrollView style={styles.commentsScrollView}>
-            {/* Render comments here */}
+            {renderComments()}
           </ScrollView>
         </Animated.View>
       )}
+      <View style={styles.buttonsContainer}>
+        <TouchableOpacity
+          style={[styles.button, { marginRight: 200 }]}
+          onPress={handleCommentPress}
+        >
+          <LinearGradient
+            colors={["#d11515", "#fa1919"]}
+            style={styles.gradient}
+          >
+            <FontAwesome name="comment" size={24} color="white" />
+          </LinearGradient>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, styles.rightButton]}
+          onPress={handleAddComment}
+        >
+          <LinearGradient
+            colors={["#d11515", "#fa1919"]}
+            style={styles.gradient}
+          >
+            <FontAwesome name="plus" size={24} color="white" />
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };
@@ -143,6 +207,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
   },
+  gradient: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  buttonsContainer: {
+    position: "absolute",
+    bottom: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    paddingHorizontal: 20,
+  },
   button: {
     position: "absolute",
     bottom: 20,
@@ -154,6 +234,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 3,
+    borderRadius: 50,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
   },
   commentsContainer: {
     marginTop: 20,

@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BASE_URL } from "../global";
 
 const GameDescAdd = ({ route }) => {
   const { gameId } = route.params;
@@ -29,7 +30,7 @@ const GameDescAdd = ({ route }) => {
         return;
       }
       const response = await axios.post(
-        `https://b41b-81-106-70-173.ngrok-free.app/api/game/${gameId}/reviews`,
+        `${BASE_URL}api/game/${gameId}/reviews`,
         {
           title: reviewTitle,
           rating,

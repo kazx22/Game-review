@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Game = require("../../model/Game");
+// const Comment = require("../models/Comment");
 const auth = require("../../middlewares/auth");
 const roleCheck = require("../../middlewares/roleCheck");
 const { check, validationResult } = require("express-validator");
@@ -89,7 +90,7 @@ router.post("/:gameId/reviews/:reviewId/comments", async (req, res) => {
   try {
     const gameId = req.params.gameId;
     const reviewId = req.params.reviewId;
-    const { text } = req.body;
+    const { username, content } = req.body;
 
     const game = await Game.findById(gameId);
 
@@ -103,8 +104,9 @@ router.post("/:gameId/reviews/:reviewId/comments", async (req, res) => {
       return res.status(404).json({ error: "Review not found" });
     }
 
-    review.comments.push({ text });
+    review.comments.push({ username, content, timestamp: new Date() });
 
+    await review.save();
     await game.save();
 
     res.status(201).json(game);

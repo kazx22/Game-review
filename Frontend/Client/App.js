@@ -7,6 +7,7 @@ import SignUp from "./screens/SignUp";
 import { ManageTabs } from "./Navigation";
 import GameDescAdd from "./screens/GameDescAdd";
 import GameReview from "./screens/GameReview";
+import AddComment from "./screens/AddComment";
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -33,6 +34,11 @@ export default function App() {
           <Stack.Screen
             name="GameReview"
             component={GameReview}
+            options={{ headerShown: false }}
+          ></Stack.Screen>
+          <Stack.Screen
+            name="AddComment"
+            component={AddComment}
             options={{ headerShown: false }}
           ></Stack.Screen>
           <Stack.Screen

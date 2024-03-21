@@ -12,6 +12,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
+import { BASE_URL } from "../global";
 const Game = () => {
   const navigation = useNavigation();
   const [currCardInd, setCurrCardInd] = useState(0);
@@ -22,9 +23,7 @@ const Game = () => {
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        const response = await axios.get(
-          "https://b41b-81-106-70-173.ngrok-free.app/api/game"
-        );
+        const response = await axios.get(`${BASE_URL}api/game`);
         setGames(response.data);
       } catch (error) {
         console.error("Error fetching games:", error);

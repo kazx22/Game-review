@@ -11,6 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 import { FontAwesome } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BASE_URL } from "../global";
 
 const LogIn = () => {
   const [username, setUsername] = useState("");
@@ -21,10 +22,10 @@ const LogIn = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post(
-        "https://b41b-81-106-70-173.ngrok-free.app/api/user/loginUser",
-        { username, password }
-      );
+      const response = await axios.post(`${BASE_URL}api/user/loginUser`, {
+        username,
+        password,
+      });
       if (!response || !response.data || !response.data.token) {
         throw new Error("Invalid response from server");
       }
@@ -37,6 +38,7 @@ const LogIn = () => {
     } catch (error) {
       console.error("Login failed:", error.message);
     }
+    // navigation.navigate("Tabs");
   };
 
   const handleSignUp = () => {
