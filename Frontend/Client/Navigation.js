@@ -1,10 +1,9 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { MaterialIcons } from "@expo/vector-icons"; // Example of using MaterialIcons, you can replace it with your preferred icon library
+import { MaterialIcons } from "@expo/vector-icons";
 import Profile from "./screens/Profile";
-import Maps from "./screens/Maps";
 import Game from "./screens/Game";
-
+import Logout from "./screens/Logout";
 const BottomTabs = createBottomTabNavigator();
 
 export function ManageTabs() {
@@ -16,8 +15,8 @@ export function ManageTabs() {
 
           if (route.name === "Profile") {
             iconName = focused ? "person" : "person-outline";
-          } else if (route.name === "Maps") {
-            iconName = focused ? "map" : "map";
+          } else if (route.name === "Logout") {
+            iconName = focused ? "logout" : "logout";
           } else if (route.name === "Game") {
             iconName = focused ? "gamepad" : "gamepad";
           }
@@ -37,8 +36,8 @@ export function ManageTabs() {
         options={{ headerShown: false }}
       />
       <BottomTabs.Screen
-        name="Maps"
-        component={Maps}
+        name="Logout"
+        component={Logout}
         options={{ headerShown: false }}
       />
     </BottomTabs.Navigator>

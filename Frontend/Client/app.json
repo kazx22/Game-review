@@ -1,10 +1,17 @@
 {
   "expo": {
+    "android": {
+      "permissions": ["ACCESS_FINE_LOCATION"]
+    },
+    "ios": {
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Your location is needed to provide relevant information.",
+        "NSLocationAlwaysUsageDescription": "Your location is needed to provide relevant information."
+      }
+    },
     "name": "Client",
     "slug": "Client",
     "version": "1.0.0",
-    "assetBundlePatterns": [
-      "**/*"
-    ]
+    "assetBundlePatterns": ["**/*"]
   }
 }

@@ -8,6 +8,8 @@ import { ManageTabs } from "./Navigation";
 import GameDescAdd from "./screens/GameDescAdd";
 import GameReview from "./screens/GameReview";
 import AddComment from "./screens/AddComment";
+import EditProfile from "./screens/EditProfile";
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -41,6 +43,12 @@ export default function App() {
             component={AddComment}
             options={{ headerShown: false }}
           ></Stack.Screen>
+          <Stack.Screen
+            name="EditProfile"
+            component={EditProfile}
+            options={{ headerShown: false }}
+          ></Stack.Screen>
+
           <Stack.Screen
             name="Tabs"
             component={ManageTabs}

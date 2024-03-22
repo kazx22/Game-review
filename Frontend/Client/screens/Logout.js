@@ -8,77 +8,29 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { BASE_URL } from "../global";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
+
 import { useNavigation } from "@react-navigation/native";
-
-const Profile = () => {
+const Logout = () => {
   const navigation = useNavigation();
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState();
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
-  const fetchUser = async () => {
+  const handleSignUp = async () => {
     try {
-      const username = await AsyncStorage.getItem("username");
-      const response = await axios.get(`${BASE_URL}api/user/${username}`);
-      setUser(response.data);
-      setLoading(false);
-      console.log(user);
+      await AsyncStorage.removeItem("username");
+      navigation.navigate("Login");
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      console.error("Error removing item from AsyncStorage:", error);
     }
   };
-
-  const handleSignUp = () => {
-    navigation.navigate("EditProfile");
-  };
-
   const handleSendMessage = () => {
-    navigation.navigate("Logout");
+    return;
   };
-
-  return loading ? (
+  return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
-        <View style={styles.headerContainer}>
-          <View style={styles.profileContainer}>
-            <ActivityIndicator size="large" color="#d11515" />
-          </View>
-        </View>
-      </View>
-    </ScrollView>
-  ) : (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.card}>
-        <View style={styles.headerContainer}>
-          <View style={styles.profileContainer}>
-            <Image
-              style={styles.profilePhoto}
-              source={{
-                uri: user.imageUrl,
-              }}
-            />
-            <Text style={styles.nameText}>{user.name}</Text>
-          </View>
-        </View>
-
         <View style={styles.section}>
-          <Text style={styles.statCount}>Date Of Birth</Text>
-          <Text style={styles.statLabel}>
-            {new Date(user.dob).toLocaleDateString("en-US")}
-          </Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.bioText}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et
-            ullamcorper nisi.
-          </Text>
+          <Text style={styles.statCount}>Are You sure</Text>
         </View>
 
         <View style={styles.section}>
@@ -89,7 +41,7 @@ const Profile = () => {
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
             >
-              <Text style={styles.buttonText}>Edit Profile</Text>
+              <Text style={styles.buttonText}>Confirm</Text>
             </LinearGradient>
           </TouchableOpacity>
 
@@ -100,7 +52,7 @@ const Profile = () => {
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
             >
-              <Text style={styles.buttonText}>Logout</Text>
+              <Text style={styles.buttonText}>Cancel</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -109,7 +61,6 @@ const Profile = () => {
     </ScrollView>
   );
 };
-
 const styles = {
   container: {
     flexGrow: 1,
@@ -190,5 +141,4 @@ const styles = {
     height: 50,
   },
 };
-
-export default Profile;
+export default Logout;

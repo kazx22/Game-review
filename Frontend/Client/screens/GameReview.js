@@ -13,6 +13,7 @@ import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { BASE_URL } from "../global";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const GameReview = ({ route }) => {
   navigation = useNavigation();
@@ -23,7 +24,7 @@ const GameReview = ({ route }) => {
   const [review, setReview] = useState();
   const slideAnim = useRef(new Animated.Value(0)).current;
   const [loading, setLoading] = useState(true);
-
+  const [username, setUsername] = useState("");
   const toggleCommentsVisibility = () => {
     setCommentVis((prev) => !prev);
     Animated.timing(slideAnim, {
@@ -33,10 +34,19 @@ const GameReview = ({ route }) => {
       useNativeDriver: true,
     }).start();
   };
+  const getUsername = async () => {
+    try {
+      const storedUsername = await AsyncStorage.getItem("username");
+      setUsername(storedUsername);
+    } catch (error) {
+      console.error("Error getting username from AsyncStorage:", error);
+    }
+  };
 
   useEffect(() => {
     fetchReview();
     fetchComment();
+    getUsername();
   }, []);
   const fetchReview = async () => {
     console.log(reviewId, gameId);
@@ -49,6 +59,18 @@ const GameReview = ({ route }) => {
       console.log(response.data);
     } catch (error) {
       setLoading(false);
+      console.error("Error fetching comments:", error);
+    }
+  };
+
+  const handleDeleteReview = async () => {
+    try {
+      const response = await axios.delete(
+        `${BASE_URL}api/game/${gameId}/reviews/${reviewId}`
+      );
+
+      navigation.navigate("Tabs");
+    } catch (error) {
       console.error("Error fetching comments:", error);
     }
   };
@@ -92,12 +114,7 @@ const GameReview = ({ route }) => {
         >
           <Text style={styles.replyButtonText}>Reply</Text>
         </TouchableOpacity>
-        {showReplies[index] && (
-          <View style={styles.replyContainer}>
-            {/* <Text>Reply 1</Text>
-            <Text>Reply 2</Text> */}
-          </View>
-        )}
+        {showReplies[index] && <View style={styles.replyContainer}></View>}
       </View>
     ));
   };
@@ -113,13 +130,25 @@ const GameReview = ({ route }) => {
               <FontAwesome key={index} name="star" size={20} color="#ffc107" />
             ))}
           </View>
-
           <ScrollView>
             <Text>Description:</Text>
             <Text style={[styles.description, { marginTop: 10 }]}>
               {review.description}
             </Text>
           </ScrollView>
+          {review && username === review.username && (
+            <TouchableOpacity
+              style={[styles.button, { marginLeft: 200, marginTop: 500 }]}
+              onPress={handleDeleteReview}
+            >
+              <LinearGradient
+                colors={["#d11515", "#fa1919"]}
+                style={styles.gradient}
+              >
+                <FontAwesome name="trash" size={24} color="white" />
+              </LinearGradient>
+            </TouchableOpacity>
+          )}
         </View>
       )}
 
@@ -145,6 +174,7 @@ const GameReview = ({ route }) => {
           </ScrollView>
         </Animated.View>
       )}
+
       <View style={styles.buttonsContainer}>
         <TouchableOpacity
           style={[styles.button, { marginRight: 200 }]}

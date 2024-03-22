@@ -184,6 +184,35 @@ router.get("/:gameId/reviews/:reviewId", async (req, res) => {
   }
 });
 
+router.delete("/:gameId/reviews/:reviewId", async (req, res) => {
+  try {
+    const gameId = req.params.gameId;
+    const reviewId = req.params.reviewId;
+
+    const game = await Game.findById(gameId);
+
+    if (!game) {
+      return res.status(404).json({ error: "Game not found" });
+    }
+
+    const reviewIndex = game.reviews.findIndex(
+      (review) => review._id.toString() === reviewId
+    );
+
+    if (reviewIndex === -1) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    game.reviews.splice(reviewIndex, 1);
+    await game.save();
+
+    res.json({ message: "Review deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 router.get("/:gameId/reviews/:reviewId/comments", async (req, res) => {
   try {
     const gameId = req.params.gameId;

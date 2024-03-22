@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import DatePicker from "@react-native-community/datetimepicker";
@@ -13,14 +15,13 @@ import { useNavigation } from "@react-navigation/native";
 import * as Location from "expo-location";
 import axios from "axios";
 import { BASE_URL } from "../global";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const SignUp = () => {
+const EditProfile = () => {
   const navigation = useNavigation();
-  const [username, setUsername] = useState("");
+  const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [dob, setDob] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [location, setLocation] = useState(null);
@@ -33,7 +34,7 @@ const SignUp = () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
       Alert.alert("Permission to access location was denied");
-      navigation.navigate("Login");
+      navigation.navigate("Tabs");
       return;
     }
 
@@ -42,25 +43,24 @@ const SignUp = () => {
   };
 
   const handleSignUp = async () => {
-    if (password !== confirmPassword) {
-      Alert.alert("Passwords do not match");
-      return;
-    }
-
     try {
-      const response = await axios.post(`${BASE_URL}api/user`, {
+      const username = await AsyncStorage.getItem("username");
+
+      const response = await axios.put(`${BASE_URL}api/user/${username}`, {
         username,
         name,
-        email,
+
         password,
         dob: dob.toISOString(),
         location: location.coords,
       });
+      Alert.alert("Edit Successful");
 
       navigation.navigate("Tabs");
       console.log("User signed up:", response.data);
     } catch (error) {
       console.error(error.message);
+    } finally {
     }
   };
 
@@ -72,43 +72,34 @@ const SignUp = () => {
       console.log("No date selected");
     }
   };
-
-  return (
+  return loading ? (
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.card}>
+        <View style={styles.headerContainer}>
+          <View style={styles.profileContainer}>
+            <ActivityIndicator size="large" color="#d11515" />
+          </View>
+        </View>
+      </View>
+    </ScrollView>
+  ) : (
     <View style={styles.container}>
-      <Text style={styles.title}>Sign Up</Text>
+      <Text style={styles.title}>Edit Profile</Text>
+
       <TextInput
         style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={(text) => setUsername(text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Name"
+        placeholder={"Name"}
         value={name}
         onChangeText={(text) => setName(text)}
       />
+
       <TextInput
         style={styles.input}
         placeholder="Email"
-        value={email}
-        onChangeText={(text) => setEmail(text)}
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
         value={password}
         onChangeText={(text) => setPassword(text)}
-        secureTextEntry={true}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm Password"
-        value={confirmPassword}
-        onChangeText={(text) => setConfirmPassword(text)}
-        secureTextEntry={true}
-      />
+
       <TouchableOpacity
         onPress={() => setShowDatePicker(true)}
         style={[styles.input, styles.dobInput]}
@@ -128,7 +119,7 @@ const SignUp = () => {
       )}
       <TouchableOpacity style={styles.button} onPress={handleSignUp}>
         <LinearGradient colors={["#d11515", "#fa1919"]} style={styles.gradient}>
-          <Text style={styles.buttonText}>Sign Up</Text>
+          <Text style={styles.buttonText}>Done</Text>
         </LinearGradient>
       </TouchableOpacity>
     </View>
@@ -193,4 +184,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SignUp;
+export default EditProfile;

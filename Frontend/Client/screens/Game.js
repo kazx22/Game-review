@@ -31,7 +31,7 @@ const Game = () => {
     };
 
     fetchGames();
-  }, [games]);
+  }, []);
 
   const handleMoveLeft = () => {
     if (currCardInd > 0) {
@@ -152,7 +152,12 @@ const Game = () => {
                 <View style={styles.cardContent}>
                   <Text style={styles.title}>{games[currCardInd].title}</Text>
                   <Text>{games[currCardInd].description}</Text>
-                  <Text>Release Date: {games[currCardInd].releaseDate}</Text>
+                  <Text>
+                    Release Date:{" "}
+                    {new Date(
+                      games[currCardInd].releaseDate
+                    ).toLocaleDateString("en-us")}
+                  </Text>
                   <Text>Genre: {games[currCardInd].genre}</Text>
                   <Text>Platform: {games[currCardInd].platform}</Text>
                   <Text>Rating: {games[currCardInd].rating}</Text>
