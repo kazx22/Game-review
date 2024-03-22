@@ -42,6 +42,10 @@ const SignUp = () => {
   };
 
   const handleSignUp = async () => {
+    if (!username || !name || !email || !password || !confirmPassword || !dob) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
     if (password !== confirmPassword) {
       Alert.alert("Passwords do not match");
       return;
@@ -57,7 +61,7 @@ const SignUp = () => {
         location: location.coords,
       });
 
-      navigation.navigate("Tabs");
+      navigation.navigate("Login");
       console.log("User signed up:", response.data);
     } catch (error) {
       console.error(error.message);

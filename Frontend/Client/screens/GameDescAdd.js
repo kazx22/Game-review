@@ -29,6 +29,10 @@ const GameDescAdd = ({ route }) => {
         console.error("Username not found");
         return;
       }
+      if (!reviewTitle || !rating || !reviewDescription) {
+        Alert.alert("Error", "Please fill in all required fields");
+        return;
+      }
       const response = await axios.post(
         `${BASE_URL}api/game/${gameId}/reviews`,
         {

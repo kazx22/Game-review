@@ -429,4 +429,24 @@ router.put("/:gameId", async (req, res) => {
   }
 });
 
+router.patch("/:gameId", async (req, res) => {
+  const { gameId } = req.params;
+  const { rating } = req.body;
+  console.log(rating);
+  try {
+    const game = await Game.findById(gameId);
+    if (!game) {
+      return res.status(404).json({ message: "Game not found" });
+    }
+    game.rating = rating;
+    await game.save();
+    return res
+      .status(200)
+      .json({ message: "Game rating updated successfully", game });
+  } catch (error) {
+    console.error("Error updating game rating:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 module.exports = router;

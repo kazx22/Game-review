@@ -48,11 +48,31 @@ const GameReview = ({ route }) => {
     }
   };
 
+  const avergaeRat = async (gameId) => {
+    try {
+      const response = await axios.get(`${BASE_URL}api/game/${gameId}/reviews`);
+      const reviews = response.data;
+
+      let totalRating = 0;
+      for (const review of reviews) {
+        totalRating += review.rating;
+      }
+      const averageRating = totalRating / reviews.length;
+
+      await axios.patch(`${BASE_URL}api/game/${gameId}`, {
+        rating: averageRating,
+      });
+    } catch (error) {
+      console.error("Error calculating and updating game rating:", error);
+    }
+  };
+
   useEffect(() => {
     fetchReview();
     fetchComment();
     getUsername();
-  }, []);
+    avergaeRat(gameId);
+  }, [review]);
   const fetchReview = async () => {
     console.log(reviewId, gameId);
     try {
