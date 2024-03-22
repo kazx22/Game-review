@@ -18,6 +18,7 @@ app.get("/", (req, res) => res.send("API RUNNING"));
 app.use("/api/user", require("./routes/api/user"));
 app.use("/api/auth", require("./routes/api/auth"));
 app.use("/api/game", require("./routes/api/game"));
+app.use("/api/mod", require("./routes/api/mod"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server is Listening to ${PORT}`));

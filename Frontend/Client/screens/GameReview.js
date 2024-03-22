@@ -172,7 +172,7 @@ const GameReview = ({ route }) => {
             {comment.replies.map((reply, replyIndex) => (
               <View key={replyIndex}>
                 <Text style={[[styles.cardContainer, { marginTop: 10 }]]}>
-                  {reply.reply}
+                  {reply.username} : {reply.reply}
                 </Text>
               </View>
             ))}

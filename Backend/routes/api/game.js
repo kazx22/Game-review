@@ -5,15 +5,15 @@ const auth = require("../../middlewares/auth");
 const roleCheck = require("../../middlewares/roleCheck");
 const { check, validationResult } = require("express-validator");
 
-// router.get("/", async (req, res) => {
-//   try {
-//     const games = await Game.find();
-//     res.json(games);
-//   } catch (error) {
-//     console.error(error.message);
-//     res.status(500).send("Server Error");
-//   }
-// });
+router.get("/:gameId", async (req, res) => {
+  try {
+    const game = await Game.findOne();
+    res.json(game);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Server Error");
+  }
+});
 
 router.post(
   "/",
@@ -289,13 +289,13 @@ router.delete(
       if (!review) {
         return res.status(404).json({ message: "Review not found" });
       }
-      const commentIndex = review.comments.findIndex(
+      const commInd = review.comments.findIndex(
         (comment) => comment._id.toString() === commentId
       );
-      if (commentIndex === -1) {
+      if (commInd === -1) {
         return res.status(404).json({ message: "Comment not found" });
       }
-      review.comments.splice(commentIndex, 1);
+      review.comments.splice(commInd, 1);
       await game.save();
       res.status(204).end();
     } catch (err) {
@@ -378,5 +378,55 @@ router.get(
     }
   }
 );
+
+router.delete("/:gameId", async (req, res) => {
+  try {
+    const gameId = req.params.gameId;
+    const deletedGame = await Game.findByIdAndDelete(gameId);
+    if (deletedGame) {
+      res.status(200).json({ message: "Game deleted successfully" });
+    } else {
+      res.status(404).json({ message: "Game not found" });
+    }
+  } catch (error) {
+    console.error("Error deleting game:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+router.put("/:gameId", async (req, res) => {
+  try {
+    const gameId = req.params.gameId;
+    const {
+      title,
+      description,
+      imageUrl,
+      releaseDate,
+      genre,
+      platform,
+      rating,
+    } = req.body;
+
+    let game = await Game.findById(gameId);
+    if (!game) {
+      return res.status(404).json({ message: "Game not found" });
+    }
+
+    if (title) game.title = title;
+    if (description) game.description = description;
+    if (imageUrl) game.imageUrl = imageUrl;
+    if (releaseDate) game.releaseDate = releaseDate;
+    if (genre) game.genre = genre;
+    if (platform) game.platform = platform;
+    if (rating) game.rating = rating;
+
+    const updatedGame = await game.save();
+
+    res.json(updatedGame);
+  } catch (error) {
+    console.error("Error updating game:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
 
 module.exports = router;

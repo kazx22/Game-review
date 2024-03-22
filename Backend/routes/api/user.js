@@ -4,7 +4,16 @@ const { check, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const User = require("../../model/User");
 const jwt = require("jsonwebtoken");
-router.get("/", (req, res) => res.send("USER ROUTE"));
+
+router.get("/", async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
 
 router.post(
   "/",
@@ -233,6 +242,27 @@ router.put("/:username", async (req, res) => {
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.put("/change/:username", async (req, res) => {
+  const { username } = req.params;
+  const { role, imageUrl } = req.body;
+  console.log(req.body);
+  try {
+    const user = await User.findOne({ username: username });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    user.role = role || "mod";
+    user.imageUrl = imageUrl;
+    await user.save();
+
+    res.json(user);
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ error: "An error occurred while updating user" });
   }
 });
 

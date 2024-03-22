@@ -10,6 +10,8 @@ import GameReview from "./screens/GameReview";
 import AddComment from "./screens/AddComment";
 import EditProfile from "./screens/EditProfile";
 import EditReview from "./screens/EditReview";
+import ModApproval from "./screens/ModApproval";
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -51,6 +53,11 @@ export default function App() {
           <Stack.Screen
             name="EditReview"
             component={EditReview}
+            options={{ headerShown: false }}
+          ></Stack.Screen>
+          <Stack.Screen
+            name="ModApproval"
+            component={ModApproval}
             options={{ headerShown: false }}
           ></Stack.Screen>
           <Stack.Screen

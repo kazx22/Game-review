@@ -5,6 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
@@ -36,7 +37,11 @@ const LogIn = () => {
       await AsyncStorage.setItem("token", token);
       navigation.navigate("Tabs");
     } catch (error) {
-      console.error("Login failed:", error.message);
+      // console.error("Login failed:", error.message);
+      Alert.alert(
+        "Login Failed",
+        "Incorrect username or password. Please try again."
+      );
     }
     // navigation.navigate("Tabs");
   };
@@ -46,7 +51,7 @@ const LogIn = () => {
   };
 
   const handleForgotPassword = () => {
-    console.log("Forgot Your Password");
+    navigation.navigate("ModApproval");
   };
 
   const toggleVisibility = () => {
@@ -104,7 +109,7 @@ const LogIn = () => {
       </View>
       <View style={styles.fpContainer}>
         <View style={styles.line} />
-        <Text style={styles.text}>Forgot Your Password? </Text>
+        <Text style={styles.text}>Do you want to be a Mod? </Text>
         <View style={styles.line} />
       </View>
       <TouchableOpacity onPress={handleForgotPassword}>

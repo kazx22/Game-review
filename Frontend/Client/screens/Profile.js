@@ -17,7 +17,8 @@ const Profile = () => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState();
-
+  const [games, setGames] = useState();
+  const [reviewCounter, setReviewCounter] = useState(0);
   useEffect(() => {
     fetchUser();
   }, []);
@@ -27,13 +28,38 @@ const Profile = () => {
       const username = await AsyncStorage.getItem("username");
       const response = await axios.get(`${BASE_URL}api/user/${username}`);
       setUser(response.data);
+
       setLoading(false);
-      console.log(user);
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
   };
+  // const reviewCount = async () => {
+  //   try {
+  //     const username = await AsyncStorage.getItem("username");
+  //     const response = await axios.get(`${BASE_URL}api/game`);
+  //     setGames(response.data);
 
+  //     let count = 0;
+  //     console.log(games);
+  //     if (games && games.length > 0) {
+  //       games.forEach((game) => {
+  //         if (game.reviews && game.reviews.length > 0) {
+  //           game.reviews.forEach((review) => {
+  //             if (review.username === username) {
+  //               count++;
+  //             }
+  //           });
+  //         }
+  //       });
+  //     }
+  //     setReviewCounter(count);
+  //   } catch (error) {
+  //     console.error("Error fetching games:", error);
+  //   }
+
+  //   console.log(reviewCounter);
+  // };
   const handleSignUp = () => {
     navigation.navigate("EditProfile");
   };
@@ -74,12 +100,11 @@ const Profile = () => {
           </Text>
         </View>
 
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <Text style={styles.bioText}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et
-            ullamcorper nisi.
+            Total Number of Reviews: {reviewCounter}
           </Text>
-        </View>
+        </View> */}
 
         <View style={styles.section}>
           <TouchableOpacity style={styles.button} onPress={handleSignUp}>
