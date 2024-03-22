@@ -13,7 +13,7 @@ const commentSchema = new mongoose.Schema({
   replies: [
     {
       username: { type: String, required: true },
-      content: {
+      reply: {
         type: String,
         required: true,
       },

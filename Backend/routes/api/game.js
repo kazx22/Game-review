@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const Game = require("../../model/Game");
-// const Comment = require("../models/Comment");
 const auth = require("../../middlewares/auth");
 const roleCheck = require("../../middlewares/roleCheck");
 const { check, validationResult } = require("express-validator");
@@ -235,5 +234,149 @@ router.get("/:gameId/reviews/:reviewId/comments", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
+router.put("/:gameId/reviews/:reviewId", async (req, res) => {
+  try {
+    const gameId = req.params.gameId;
+    const reviewId = req.params.reviewId;
+
+    const { title, rating, description } = req.body;
+
+    const game = await Game.findById(gameId);
+    if (!game) {
+      return res.status(404).json({ message: "Game not found" });
+    }
+
+    const modRev = game.reviews.find(
+      (review) => review._id.toString() === reviewId
+    );
+    if (!modRev) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+    if (title) {
+      modRev.title = title;
+    }
+    if (rating) {
+      modRev.rating = rating;
+    }
+    if (description) {
+      modRev.description = description;
+    }
+    await game.save();
+    res
+      .status(200)
+      .json({ message: "Game information updated successfully", Game });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+router.delete(
+  "/:gameId/reviews/:reviewId/comments/:commentId",
+  async (req, res) => {
+    try {
+      const gameId = req.params.gameId;
+      const reviewId = req.params.reviewId;
+      const commentId = req.params.commentId;
+
+      const game = await Game.findById(gameId);
+      if (!game) {
+        return res.status(404).json({ message: "Game not found" });
+      }
+      const review = game.reviews.find(
+        (review) => review._id.toString() === reviewId
+      );
+      if (!review) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+      const commentIndex = review.comments.findIndex(
+        (comment) => comment._id.toString() === commentId
+      );
+      if (commentIndex === -1) {
+        return res.status(404).json({ message: "Comment not found" });
+      }
+      review.comments.splice(commentIndex, 1);
+      await game.save();
+      res.status(204).end();
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  }
+);
+router.post(
+  "/:gameId/reviews/:reviewId/comments/:commentId/replies",
+  async (req, res) => {
+    try {
+      const gameId = req.params.gameId;
+      const reviewId = req.params.reviewId;
+      const commentId = req.params.commentId;
+      const { username, reply } = req.body;
+      console.log(username, reply);
+      const game = await Game.findById(gameId);
+      if (!game) {
+        return res.status(404).json({ message: "Game not found" });
+      }
+      const review = game.reviews.find(
+        (review) => review._id.toString() === reviewId
+      );
+      if (!review) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+      const comment = review.comments.find(
+        (comment) => comment._id.toString() === commentId
+      );
+      if (!comment) {
+        return res.status(404).json({ message: "Comment not found" });
+      }
+      const newReply = {
+        username,
+        reply,
+        timestamp: new Date(),
+      };
+      comment.replies.push(newReply);
+      await game.save();
+      res.status(201).json({
+        message: "Reply added successfully",
+      });
+    } catch (error) {
+      console.error("Error adding reply:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+);
+
+router.get(
+  "/:gameId/reviews/:reviewId/comments/:commentId/replies",
+  async (req, res) => {
+    try {
+      const gameId = req.params.gameId;
+      const reviewId = req.params.reviewId;
+      const commentId = req.params.commentId;
+
+      const game = await Game.findById(gameId);
+      if (!game) {
+        return res.status(404).json({ message: "Game not found" });
+      }
+      const review = game.reviews.find(
+        (review) => review._id.toString() === reviewId
+      );
+      if (!review) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+      const comment = review.comments.find(
+        (comment) => comment._id.toString() === commentId
+      );
+      if (!comment) {
+        return res.status(404).json({ message: "Comment not found" });
+      }
+      const replies = comment.replies;
+      res.status(200).json({ replies });
+    } catch (error) {
+      console.error("Error fetching replies:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+);
 
 module.exports = router;

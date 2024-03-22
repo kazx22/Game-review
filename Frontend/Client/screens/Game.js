@@ -21,18 +21,16 @@ const Game = () => {
   const [games, setGames] = useState([]);
 
   useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}api/game`);
-        setGames(response.data);
-      } catch (error) {
-        console.error("Error fetching games:", error);
-      }
-    };
-
     fetchGames();
   }, []);
-
+  const fetchGames = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}api/game`);
+      setGames(response.data);
+    } catch (error) {
+      console.error("Error fetching games:", error);
+    }
+  };
   const handleMoveLeft = () => {
     if (currCardInd > 0) {
       fadeOut(() => setCurrCardInd((prevIndex) => prevIndex - 1));

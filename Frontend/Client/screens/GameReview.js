@@ -7,6 +7,8 @@ import {
   StyleSheet,
   Animated,
   Easing,
+  TextInput,
+  Alert,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import axios from "axios";
@@ -25,6 +27,9 @@ const GameReview = ({ route }) => {
   const slideAnim = useRef(new Animated.Value(0)).current;
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
+  const [reply, setReply] = useState("");
+  const [replies, setReplies] = useState();
+
   const toggleCommentsVisibility = () => {
     setCommentVis((prev) => !prev);
     Animated.timing(slideAnim, {
@@ -36,8 +41,8 @@ const GameReview = ({ route }) => {
   };
   const getUsername = async () => {
     try {
-      const storedUsername = await AsyncStorage.getItem("username");
-      setUsername(storedUsername);
+      const user = await AsyncStorage.getItem("username");
+      setUsername(user);
     } catch (error) {
       console.error("Error getting username from AsyncStorage:", error);
     }
@@ -65,16 +70,26 @@ const GameReview = ({ route }) => {
 
   const handleDeleteReview = async () => {
     try {
-      const response = await axios.delete(
-        `${BASE_URL}api/game/${gameId}/reviews/${reviewId}`
-      );
-
+      await axios.delete(`${BASE_URL}api/game/${gameId}/reviews/${reviewId}`);
+      Alert.alert("Review Delete Successful");
       navigation.navigate("Tabs");
     } catch (error) {
       console.error("Error fetching comments:", error);
     }
   };
-
+  const handleEditReview = () => {
+    navigation.navigate("EditReview", { gameId, reviewId });
+  };
+  const fetchReplies = async () => {
+    try {
+      const response = await axios.get(
+        `${BASE_URL}api/game/${gameId}/reviews/${reviewId}/comments`
+      );
+      setReplies(response.data);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
+  };
   const fetchComment = async () => {
     console.log(reviewId, gameId);
     try {
@@ -103,18 +118,78 @@ const GameReview = ({ route }) => {
       [index]: !prevState[index],
     }));
   };
+
+  const addReply = async (id) => {
+    try {
+      console.log(gameId, reviewId, id);
+      const response = await axios.post(
+        `${BASE_URL}api/game/${gameId}/reviews/${reviewId}/comments/${id}/replies`,
+        { username, reply }
+      );
+      Alert.alert("Reply Successful");
+      fetchComment();
+    } catch (error) {
+      setLoading(false);
+      console.error("Error fetching comments:", error);
+    }
+  };
+  const handleDeleteComment = async (id) => {
+    try {
+      const response = await axios.delete(
+        `${BASE_URL}api/game/${gameId}/reviews/${reviewId}/comments/${id}`
+      );
+      Alert.alert("Comment Deleted");
+      fetchComment();
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    }
+  };
   const renderComments = () => {
     return comments.map((comment, index) => (
       <View key={index} style={styles.commentContainer}>
         <Text style={styles.commentAuthor}>{comment.username}</Text>
         <Text style={styles.commentText}>{comment.content}</Text>
-        <TouchableOpacity
-          style={styles.replyButton}
-          onPress={() => handleReplyPress(index)}
-        >
-          <Text style={styles.replyButtonText}>Reply</Text>
-        </TouchableOpacity>
-        {showReplies[index] && <View style={styles.replyContainer}></View>}
+        <View style={{ marginTop: 10, marginLeft: -1 }}>
+          {comment && username === comment.username && (
+            <>
+              <TouchableOpacity
+                style={styles.replyButton}
+                onPress={() => handleDeleteComment(comment._id)}
+              >
+                <Text style={styles.replyButtonText}>Delete</Text>
+              </TouchableOpacity>
+            </>
+          )}
+          <TouchableOpacity
+            style={[styles.replyButton, { marginTop: -30, marginLeft: 300 }]}
+            onPress={() => handleReplyPress(index)}
+          >
+            <Text style={styles.replyButtonText}>Reply</Text>
+          </TouchableOpacity>
+        </View>
+        {showReplies[index] && (
+          <View style={styles.replyContainer}>
+            {comment.replies.map((reply, replyIndex) => (
+              <View key={replyIndex}>
+                <Text style={[[styles.cardContainer, { marginTop: 10 }]]}>
+                  {reply.reply}
+                </Text>
+              </View>
+            ))}
+            <TextInput
+              style={[styles.replyInput, { marginTop: 20 }]}
+              placeholder="Write your reply"
+              value={reply}
+              onChangeText={(text) => setReply(text)}
+            />
+            <TouchableOpacity
+              style={[styles.replyButton, { marginTop: 20, marginLeft: 250 }]}
+              onPress={() => addReply(comment._id)}
+            >
+              <Text style={styles.replyButtonText}>Reply</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     ));
   };
@@ -136,19 +211,34 @@ const GameReview = ({ route }) => {
               {review.description}
             </Text>
           </ScrollView>
-          {review && username === review.username && (
-            <TouchableOpacity
-              style={[styles.button, { marginLeft: 200, marginTop: 500 }]}
-              onPress={handleDeleteReview}
-            >
-              <LinearGradient
-                colors={["#d11515", "#fa1919"]}
-                style={styles.gradient}
-              >
-                <FontAwesome name="trash" size={24} color="white" />
-              </LinearGradient>
-            </TouchableOpacity>
-          )}
+          <View>
+            {review && username === review.username && (
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={[styles.button, { marginBottom: -20 }]}
+                  onPress={handleDeleteReview}
+                >
+                  <LinearGradient
+                    colors={["#d11515", "#fa1919"]}
+                    style={styles.gradient}
+                  >
+                    <FontAwesome name="trash" size={24} color="white" />
+                  </LinearGradient>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.button, , { marginBottom: 90 }]}
+                  onPress={handleEditReview}
+                >
+                  <LinearGradient
+                    colors={["#d11515", "#fa1919"]}
+                    style={[styles.gradient]}
+                  >
+                    <FontAwesome name="edit" size={24} color="white" />
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
         </View>
       )}
 
